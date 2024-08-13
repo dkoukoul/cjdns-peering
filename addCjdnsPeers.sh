@@ -1,4 +1,25 @@
 #!/bin/bash
+print_help() {
+  echo "Usage: $0 [options]"
+  echo
+  echo "Options:"
+  echo "  --help                Show this help message and exit"
+  echo
+  echo "Environment Variables:"
+  echo "  CJDNS_PATH            Path to the cjdns installation directory"
+  echo "  CJDNS_NAME            Name of the cjdns node (optional)"
+  echo
+  echo "Description:"
+  echo "  This script checks the status of existing cjdns peers and adds new peers if necessary."
+  echo "  It requires 'jq' to be installed and the 'CJDNS_PATH' environment variable to be set."
+}
+
+# Check for --help argument
+if [[ "$1" == "--help" ]]; then
+  print_help
+  exit 0
+fi
+
 if ! command -v jq &> /dev/null; then
   echo "Error: jq is not installed."
   exit 1
@@ -8,7 +29,11 @@ if [ -z "$CJDNS_PATH" ]; then
   echo "Error: CJDNS_PATH environment variable is not set."
   exit 1
 fi
-
+if [ -z "$CJDNS_NAME" ]; then
+  read -p "Enter your cjdns node's name: " name
+else
+  name=$CJDNS_NAME
+fi
 cjdrouteFile="$CJDNS_PATH/cjdroute.conf"
 cjdnstoolspath="$CJDNS_PATH/tools"
 
@@ -33,7 +58,7 @@ cjdnsip=$(cat $cjdrouteFile | jq -r .ipv6)
 login=$(cat $cjdrouteFile | jq -r .authorizedPasswords[0].user)
 password=$(cat $cjdrouteFile | jq -r .authorizedPasswords[0].password)
 CJDNS_PORT=$(cat $cjdrouteFile | jq -r '.interfaces.UDPInterface[0].bind' | sed 's/^.*://')
-read -p "Enter your cjdns node's name: " name
+
 
 #Check current peers and their status
 peerStats=$($cjdnstoolspath/peerStats)
