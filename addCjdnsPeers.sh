@@ -87,7 +87,7 @@ if [ "$remainingPeers" -lt 3 ]; then
     "ip6": "'"$cjdnsip"'",
     "port": '"$CJDNS_PORT"',
     "publicKey": "'"$publickey"'"
-  }' http://diffie.pkteer.com:8090/api/peers || cat cjdnspeers.json)
+  }' http://diffie.pkteer.com:8090/api/peers || cat peers.json)
 
   # Parse the JSON data and execute the command for each server, until we have 3 peers
   echo "$json" | jq -r '.[] | "\(.publicKey) \(.ip):\(.port) \(.login) \(.password)"' | while read -r line
